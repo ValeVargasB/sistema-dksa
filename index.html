@@ -1,0 +1,250 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ventas y Apartados</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <img src="img/Logo.png" alt="Logo de la tienda">
+      </div>
+    </div>
+
+    <nav>
+      <button class="nav-btn active" data-view="dashboard"><i class="fa-solid fa-house menu-btn"></i>Dashboard</button>
+      <button class="nav-btn " data-view="clientes"><i class="fa-solid fa-user menu-btn"></i>Clientes</button>
+      <button class="nav-btn" data-view="inventario"><i class="fa-solid fa-box menu-btn"></i>Inventario</button>
+      <button class="nav-btn" data-view="ventas"><i class="fa-solid fa-shopping-cart menu-btn"></i>Ventas</button>
+      <button class="nav-btn" data-view="nuevaVenta"><i class="fa-solid fa-plus menu-btn"></i>Nueva venta</button>
+    </nav>
+
+  </aside>
+
+  <main class="app">
+    <header class="topbar">
+
+<button id="refreshBtn" class="secondary">Actualizar</button>
+    </header>
+
+    <section id="dashboard" class="view active">
+      <div class="metrics" id="metricsGrid"></div>
+    </section>
+
+    <section id="clientes" class="view">
+      <div class="panel two-col">
+        <form id="clientForm" class="card form-card">
+          <h3 id="clientFormTitle">Registrar cliente</h3>
+          <label>Nombre<input id="clientName" required /></label>
+          <label>Teléfono<input id="clientPhone" /></label>
+          <label>Observaciones<textarea id="clientNotes"></textarea></label>
+          <div class="actions">
+            <button id="clientSubmitBtn" type="submit">Guardar cliente</button>
+            <button id="cancelClientEdit" class="secondary hidden" type="button">Cancelar edición</button>
+          </div>
+        </form>
+        <div class="card">
+          <div class="section-head">
+            <h3>Clientes</h3>
+            <input id="clientSearch" placeholder="Buscar cliente" />
+          </div>
+          <div id="clientsList" class="list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="ventas" class="view">
+      <div class="card">
+        <div class="section-head wrap">
+          <h3>Ventas</h3>
+          <input id="saleSearch" placeholder="Buscar por venta, cliente o teléfono" />
+          <select id="statusFilter">
+            <option value="">Todos los estados</option>
+            <option>Pagado</option>
+            <option>Pendiente</option>
+            <option>Vencido</option>
+            <option>Cancelado</option>
+          </select>
+          <select id="typeFilter">
+            <option value="">Todos los tipos</option>
+            <option>Contado</option>
+            <option>Apartado</option>
+          </select>
+          <input id="saleDateFilter" type="date" title="Filtrar por fecha de venta" />
+          <button id="clearSalesFilters" class="secondary" type="button">Limpiar filtros</button>
+        </div>
+        <div id="salesList" class="list"></div>
+      </div>
+    </section>
+
+    <section id="inventario" class="view">
+      <div class="inventory-layout">
+        <form id="productForm" class="card form-card inventory-form-card">
+          <h3 id="productFormTitle"><span class="section-icon"><i class="fa-solid fa-truck"></i></span>Registrar producto</h3>
+          <div class="inventory-form-grid">
+            <label>Nombre del producto<input id="productName" placeholder="Ej. Abridor botellas" required /></label>
+            <label>Código automático<input id="productCode" readonly value="PRO-01" /></label>
+            <label>Precio venta
+              <span class="money-input compact-money">
+                <span>₡</span>
+                <input id="productPrice" type="number" min="0" step="0.01" placeholder="0,00" required />
+              </span>
+            </label>
+            <label id="productStockField">Ingreso inicial<input id="productStock" type="number" min="0" step="1" value="1" required /></label>
+          </div>
+          <div class="inventory-form-bottom">
+            <label>Observaciones (opcional)<textarea id="productNotes" placeholder="Agrega observaciones sobre el producto..."></textarea></label>
+            <div class="inventory-form-actions">
+              <button id="productSubmitBtn" type="submit">Guardar producto</button>
+              <button id="cancelProductEdit" type="button" class="secondary hidden">Cancelar edición</button>
+            </div>
+          </div>
+        </form>
+        <div class="card inventory-products-card">
+          <div class="section-head">
+            <h3><span class="section-icon"><i class="fa-brands fa-shopify"></i></span>Productos</h3>
+            <div class="search-input inventory-search"><span>⌕</span><input id="productSearch" placeholder="Buscar producto..." /></div>
+          </div>
+          <div id="inventorySummary" class="inventory-summary"></div>
+          <div id="productsList" class="inventory-products-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="nuevaVenta" class="view">
+      <form id="saleForm" class="card form-card wide">
+        <h3>Nueva venta</h3>
+        <div class="grid-2">
+          <label>Cliente<select id="saleClient" required></select></label>
+          <label>Fecha de venta<input id="saleDate" type="date" required /></label>
+          <label>Tipo de venta<select id="saleType"><option>Contado</option><option>Apartado</option></select></label>
+          <label>Descuento<input id="discount" type="number" min="0" step="0.01" value="0" /></label>
+          <label>Método de pago<select id="paymentMethod"><option>Efectivo</option><option>SINPE</option><option>Tarjeta</option><option>Transferencia</option></select></label>
+          <label class="apartado-only">Monto inicial<input id="initialPayment" type="number" min="0" step="0.01" value="0" /></label>
+          <label class="apartado-only">Fecha límite<input id="dueDate" type="date" /></label>
+        </div>
+        <label>Observaciones<textarea id="saleNotes"></textarea></label>
+        <div class="items-box">
+          <div class="section-head">
+            <h4>Artículos</h4>
+            <button type="button" id="addItemBtn" class="secondary">Agregar artículo</button>
+          </div>
+          <div id="itemsList" class="list compact"></div>
+        </div>
+        <div class="summary" id="saleSummary"></div>
+        <button type="submit">Guardar venta</button>
+      </form>
+    </section>
+
+  </main>
+
+  <dialog id="itemDialog">
+    <form method="dialog" id="itemForm" class="dialog-form">
+      <h3>Agregar artículo</h3>
+      <label>Buscar producto
+        <div class="search-input">
+          <span>🔍</span>
+          <input id="itemProductSearch" placeholder="Escriba el nombre o código" autocomplete="off" />
+        </div>
+      </label>
+      <input id="itemProduct" type="hidden" required />
+      <div id="productResults" class="product-results"></div>
+      <div id="itemProductInfo" class="muted"></div>
+      <label>Cantidad<input id="itemQty" type="number" min="1" value="1" required /></label>
+      <label>Precio unitario<input id="itemPrice" type="number" min="0" step="0.01" required /></label>
+      <menu>
+        <button type="button" id="cancelItem" class="secondary">Cancelar</button>
+        <button type="submit">Agregar</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="saleDialog">
+    <div class="dialog-form wide-dialog">
+      <div class="section-head">
+        <h3 id="detailTitle">Detalle</h3>
+        <button id="closeDetail" class="secondary">Cerrar</button>
+      </div>
+      <div id="saleDetail"></div>
+    </div>
+  </dialog>
+
+  <dialog id="paymentDialog">
+    <form id="paymentForm" class="payment-modal">
+      <header class="payment-header">
+        <div class="payment-title">
+          <span class="payment-icon">▣</span>
+          <h3>Registrar abono</h3>
+        </div>
+        <button type="button" id="closePayment" class="icon-btn" aria-label="Cerrar">×</button>
+      </header>
+
+      <div class="payment-body">
+        <aside class="payment-summary-card">
+          <h4>Resumen del cliente</h4>
+          <div class="payment-summary-row">
+            <span>Total de la compra</span>
+            <strong id="paymentSaleTotal">₡0,00</strong>
+          </div>
+          <div class="payment-summary-row">
+            <span>Total abonado</span>
+            <strong id="paymentTotalPaid">₡0,00</strong>
+          </div>
+          <div class="payment-divider"></div>
+          <span class="payment-balance-label">Saldo pendiente</span>
+          <strong id="paymentBalance" class="payment-balance">₡0,00</strong>
+          <div class="payment-note">El abono se aplicará al saldo pendiente de este cliente.</div>
+        </aside>
+
+        <div class="payment-fields">
+          <label>Fecha del abono
+            <input id="paymentDate" type="date" required />
+          </label>
+          <label>Método de pago
+            <select id="paymentMethodDialog">
+              <option>Efectivo</option>
+              <option>SINPE</option>
+              <option>Tarjeta</option>
+              <option>Transferencia</option>
+            </select>
+          </label>
+          <label>Monto del abono
+            <div class="money-input">
+              <span>₡</span>
+              <input id="paymentAmount" type="number" min="1" step="0.01" placeholder="0,00" required />
+            </div>
+          </label>
+          <label>Observación (opcional)
+            <textarea id="paymentNotes" placeholder="Ej. Pago por SINPE, segundo abono, etc."></textarea>
+          </label>
+        </div>
+      </div>
+
+      <footer class="payment-footer">
+        <button type="button" id="cancelPayment" class="secondary">Cancelar</button>
+        <button type="submit" class="success">Registrar abono</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="stockDialog">
+    <form id="stockForm" class="dialog-form">
+      <h3>Ingresar inventario</h3>
+      <div id="stockProductInfo" class="muted"></div>
+      <label>Cantidad a ingresar<input id="stockEntryQty" type="number" min="1" step="1" required /></label>
+      <label>Observación (opcional)<textarea id="stockEntryNotes" placeholder="Ej. Compra nueva, reposición, ajuste, etc."></textarea></label>
+      <menu>
+        <button type="button" id="cancelStockEntry" class="secondary">Cancelar</button>
+        <button type="submit" class="success">Sumar al inventario</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
